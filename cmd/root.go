@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/icecream78/gomidoro/pomodoro"
 	"os"
 
 	"github.com/cheggaaa/pb/v3"
@@ -30,9 +31,9 @@ var (
 	cfgFile string
 	// wTime, rTime, borderTime int = 25 * 60, 5 * 60, 1 * 60
 	wTime, rTime, borderTime int = 10, 5 * 60, 5
-	sCounter                 *StepsCounter
-	workTimer                *Timer
-	rTimer                   *Timer
+	sCounter                 *pomodoro.StepsCounter
+	workTimer                *pomodoro.Timer
+	rTimer                   *pomodoro.Timer
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -46,9 +47,9 @@ var rootCmd = &cobra.Command{
 			fmt.Println("Error occuer")
 			return err
 		}
-		sCounter = NewStepsCounter(r)
-		workTimer = NewTimer(wTime, borderTime)
-		rTimer = NewTimer(rTime, borderTime)
+		sCounter = pomodoro.NewStepsCounter(r)
+		workTimer = pomodoro.NewTimer(wTime, borderTime)
+		rTimer = pomodoro.NewTimer(rTime, borderTime)
 
 		pb.RegisterElement("wtimer", workTimer, true)
 		pb.RegisterElement("rtimer", rTimer, true)
@@ -57,7 +58,7 @@ var rootCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		widget := NewWidget(workTimer, sCounter)
+		widget := pomodoro.NewWidget(wTime, workTimer, sCounter)
 		widget.Run()
 	},
 }

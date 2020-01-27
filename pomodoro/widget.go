@@ -1,4 +1,4 @@
-package cmd
+package pomodoro
 
 import "github.com/cheggaaa/pb/v3"
 
@@ -19,9 +19,10 @@ type Widget struct {
 	bar     *pb.ProgressBar
 	timer   Ticker
 	stepper Stepper
+	wTime   int
 }
 
-func NewWidget(timer Ticker, stepper Stepper) *Widget {
+func NewWidget(wTime int, timer Ticker, stepper Stepper) *Widget {
 	tmpl := `{{ red "Work time:" }} {{bar . "[" "=" "=>" "_" "]"}} {{ wtimer . }} {{ steps . }}`
 	bar := pb.ProgressBarTemplate(tmpl).Start64(int64(wTime))
 
@@ -29,6 +30,7 @@ func NewWidget(timer Ticker, stepper Stepper) *Widget {
 		bar:     bar,
 		timer:   timer,
 		stepper: stepper,
+		wTime:   wTime,
 	}
 }
 
@@ -43,6 +45,6 @@ func (w *Widget) Run() {
 		w.bar.Finish()
 		w.stepper.NextStep()
 		tmpl := `{{ red "Work time:" }} {{bar . "[" "=" "=>" "_" "]"}} {{ wtimer . }} {{ steps . }}`
-		w.bar = pb.ProgressBarTemplate(tmpl).Start64(int64(wTime))
+		w.bar = pb.ProgressBarTemplate(tmpl).Start64(int64(w.wTime))
 	}
 }

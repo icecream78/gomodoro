@@ -1,4 +1,4 @@
-package cmd
+package pomodoro
 
 type BarWidgeter interface {
 	Run()
