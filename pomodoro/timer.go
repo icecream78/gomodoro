@@ -32,7 +32,7 @@ type Timer struct {
 	seconds      int
 	current      int
 	notifyBorder int
-	mx           sync.RWMutex
+	mx           sync.Mutex
 }
 
 func NewTimer(t int, borderSec int) *Timer {

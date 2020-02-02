@@ -1,50 +1,46 @@
 package pomodoro
 
-import "github.com/cheggaaa/pb/v3"
+import (
+	"github.com/cheggaaa/pb/v3"
+)
 
-import "time"
-
-type Ticker interface {
-	Tick()
-	Finished() bool
-	Refresh()
-}
-
-type Stepper interface {
-	NextStep()
-	Finished() bool
+func NewBar(template string, showTime int) *Widget {
+	bar := pb.ProgressBarTemplate(template).Start(showTime)
+	return &Widget{
+		template: template,
+		showTime: showTime,
+		bar:      bar,
+	}
 }
 
 type Widget struct {
-	bar     *pb.ProgressBar
-	timer   Ticker
-	stepper Stepper
-	wTime   int
+	template string
+	showTime int
+	bar      *pb.ProgressBar
 }
 
-func NewWidget(wTime int, timer Ticker, stepper Stepper) *Widget {
-	tmpl := `{{ red "Work time:" }} {{bar . "[" "=" "=>" "_" "]"}} {{ wtimer . }} {{ steps . }}`
-	bar := pb.ProgressBarTemplate(tmpl).Start64(int64(wTime))
-
-	return &Widget{
-		bar:     bar,
-		timer:   timer,
-		stepper: stepper,
-		wTime:   wTime,
-	}
+func (w *Widget) RegisterElement(alias string, element WidgetElement) {
+	pb.RegisterElement(alias, element, true)
 }
 
-func (w *Widget) Run() {
-	for !w.stepper.Finished() {
-		for !w.timer.Finished() {
-			w.timer.Tick()
-			w.bar.Increment()
-			time.Sleep(time.Second)
-		}
-		w.timer.Refresh()
-		w.bar.Finish()
-		w.stepper.NextStep()
-		tmpl := `{{ red "Work time:" }} {{bar . "[" "=" "=>" "_" "]"}} {{ wtimer . }} {{ steps . }}`
-		w.bar = pb.ProgressBarTemplate(tmpl).Start64(int64(w.wTime))
-	}
+func (b *Widget) Tick() {
+	b.bar.Increment()
+}
+
+// TODO: write proper logic
+func (b *Widget) Finished() bool {
+	return false
+}
+
+// TODO: write proper logic
+func (b *Widget) Refresh() {
+	return
+}
+
+// TODO: remove handler
+func (b *Widget) ProgressElement(state *pb.State, args ...string) string {
+	return ""
+}
+
+func (b *Widget) Run() {
 }

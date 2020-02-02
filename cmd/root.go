@@ -17,10 +17,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/icecream78/gomidoro/pomodoro"
 	"os"
 
-	"github.com/cheggaaa/pb/v3"
+	"github.com/icecream78/gomidoro/pomodoro"
+
 	"github.com/spf13/cobra"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -42,24 +42,22 @@ var rootCmd = &cobra.Command{
 	Short: "CLI app for increasing your productivity with Pomodoro method",
 	Long:  ``,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		r, err := cmd.Flags().GetInt("count")
-		if err != nil {
-			fmt.Println("Error occuer")
-			return err
-		}
-		sCounter = pomodoro.NewStepsCounter(r)
-		workTimer = pomodoro.NewTimer(wTime, borderTime)
-		rTimer = pomodoro.NewTimer(rTime, borderTime)
-
-		pb.RegisterElement("wtimer", workTimer, true)
-		pb.RegisterElement("rtimer", rTimer, true)
-		pb.RegisterElement("steps", sCounter, true)
-
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		widget := pomodoro.NewWidget(wTime, workTimer, sCounter)
-		widget.Run()
+		r, err := cmd.Flags().GetInt("count")
+		if err != nil {
+			fmt.Println("Error occuer13")
+			return
+		}
+		tmpl := `{{ red "Work time:" }} {{bar . "[" "=" "=>" "_" "]"}} {{ timer . }} {{ steps . }}`
+		bar := pomodoro.NewBar(tmpl, wTime)
+		p := pomodoro.NewPomodoroTimer(r, tmpl)
+		p.RegisterTick(bar)
+
+		// run app
+		bar.Run()
+		p.Run()
 	},
 }
 
