@@ -1,8 +1,10 @@
-package pomodoro
+package widget
 
 import (
 	"fmt"
 	"strconv"
+
+	"github.com/icecream78/gomidoro/pomodoro"
 
 	"github.com/cheggaaa/pb/v3"
 	"github.com/fatih/color"
@@ -55,7 +57,7 @@ func (b *Widget) Refresh() {
 	return
 }
 
-func (b *Widget) Update(state *State) {
+func (b *Widget) Update(state *pomodoro.State) {
 	b.bar.Increment()
 	ts := b.RenderTimer(state.Progress)
 	ss := b.RenderSteps(state.Step, state.TotalStep)

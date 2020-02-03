@@ -2,35 +2,35 @@ package pomodoro
 
 import (
 	"time"
-
-	"github.com/cheggaaa/pb/v3"
 )
 
 type Pomodoro struct {
 	stepsCount int
-	tmpl       string
 	wTime      int
 	timer      Ticker
 	stepper    Stepper
-	fns        []Ticker
+	subscribes []Oberver
 }
 
-func NewPomodoroTimer(stepsCount int, template string) *Pomodoro {
+func NewPomodoroTimer(stepsCount int) *Pomodoro {
 	return &Pomodoro{
 		stepsCount: stepsCount,
-		tmpl:       template,
 	}
 }
 
-func (p *Pomodoro) RegisterTick(fn Ticker) {
-	p.fns = append(p.fns, fn)
+func (p *Pomodoro) Subscribe(sub Oberver) {
+	p.subscribes = append(p.subscribes, sub)
 }
 
-func (p *Pomodoro) runTickers() {
-	var fn Ticker
-	for i := 0; i < len(p.fns); i++ {
-		fn = p.fns[i]
-		fn.Tick()
+// TODO: add method for removing subscriber from list
+func (p *Pomodoro) Unsubscribe(sub Oberver) {
+}
+
+func (p *Pomodoro) Notify(state *State) {
+	var fn Oberver
+	for i := 0; i < len(p.subscribes); i++ {
+		fn = p.subscribes[i]
+		fn.Update(state)
 	}
 }
 
@@ -51,14 +51,18 @@ func (p *Pomodoro) Run() {
 
 	for !stepper.Finished() {
 		stepTime = p.getStepTime(stepper.CurrentStep())
-		timer = NewTimer(stepTime, 1*60)
+		timer = NewTimer(stepTime)
 
-		pb.RegisterElement("timer", timer, true)
-		pb.RegisterElement("steps", stepper, true)
+		var state *State
 
 		for !timer.Finished() {
 			timer.Tick()
-			go p.runTickers()
+			state = &State{
+				Step:      stepper.CurrentStep(),
+				Progress:  timer.State(),
+				TotalStep: p.stepsCount,
+			}
+			go p.Notify(state)
 			time.Sleep(1 * time.Second)
 		}
 		stepper.NextStep()

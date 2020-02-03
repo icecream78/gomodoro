@@ -1,12 +1,20 @@
 package pomodoro
 
-import "github.com/cheggaaa/pb/v3"
+type Observable interface {
+	Subscribe(sub Oberver)
+	Unsubscribe(sub Oberver)
+	Notify(state State)
+}
+
+type Oberver interface {
+	Update(state *State)
+}
 
 type Ticker interface {
 	Tick()
 	Refresh()
 	Finished() bool
-	WidgetElement
+	State() int
 }
 
 type Stepper interface {
@@ -14,9 +22,4 @@ type Stepper interface {
 	Refresh()
 	Finished() bool
 	NextStep()
-	WidgetElement
-}
-
-type WidgetElement interface {
-	ProgressElement(state *pb.State, args ...string) string
 }

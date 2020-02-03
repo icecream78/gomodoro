@@ -47,16 +47,15 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		r, err := cmd.Flags().GetInt("count")
 		if err != nil {
-			fmt.Println("Error occuer13")
+			fmt.Println("Error occuer")
 			return
 		}
-		tmpl := `{{ red "Work time:" }} {{bar . "[" "=" "=>" "_" "]"}} {{ timer . }} {{ steps . }}`
+		tmpl := `{{ red "Work time:" }} {{bar . "[" "=" "=>" "_" "]"}} {{ string . "timer" }} {{ string . "steps" }}`
 		bar := pomodoro.NewBar(tmpl, wTime)
-		p := pomodoro.NewPomodoroTimer(r, tmpl)
-		p.RegisterTick(bar)
+		p := pomodoro.NewPomodoroTimer(r)
+		p.Subscribe(bar)
 
 		// run app
-		bar.Run()
 		p.Run()
 	},
 }

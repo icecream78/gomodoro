@@ -1,10 +1,7 @@
 package pomodoro
 
 import (
-	"fmt"
 	"sync"
-
-	"github.com/cheggaaa/pb/v3"
 )
 
 func NewStepsCounter(steps int) *StepsCounter {
@@ -43,15 +40,4 @@ func (s *StepsCounter) CurrentStep() int {
 
 func (s *StepsCounter) Finished() bool {
 	return s.CurrentStep() == s.steps+1
-}
-
-func (s *StepsCounter) String() string {
-	if s.steps == 1 {
-		return ""
-	}
-	return fmt.Sprintf("%d/%d", s.CurrentStep(), s.steps)
-}
-
-func (s *StepsCounter) ProgressElement(state *pb.State, args ...string) string {
-	return s.String()
 }
