@@ -4,5 +4,7 @@ type State struct {
 	Step      int
 	TotalStep int
 
-	Progress int
+	Progress         int
+	Finished         bool
+	MakeNotification bool
 }

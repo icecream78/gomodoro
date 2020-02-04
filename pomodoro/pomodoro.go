@@ -58,9 +58,11 @@ func (p *Pomodoro) Run() {
 		for !timer.Finished() {
 			timer.Tick()
 			state = &State{
-				Step:      stepper.CurrentStep(),
-				Progress:  timer.State(),
-				TotalStep: p.stepsCount,
+				Step:             stepper.CurrentStep(),
+				Progress:         timer.State(),
+				TotalStep:        p.stepsCount,
+				Finished:         timer.Finished(),
+				MakeNotification: false,
 			}
 			go p.Notify(state)
 			time.Sleep(1 * time.Second)
