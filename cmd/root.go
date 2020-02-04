@@ -20,6 +20,7 @@ import (
 	"os"
 
 	"github.com/icecream78/gomodoro/pomodoro"
+	"github.com/icecream78/gomodoro/widget"
 
 	"github.com/spf13/cobra"
 
@@ -51,7 +52,7 @@ var rootCmd = &cobra.Command{
 			return
 		}
 		tmpl := `{{ red "Work time:" }} {{bar . "[" "=" "=>" "_" "]"}} {{ string . "timer" }} {{ string . "steps" }}`
-		bar := pomodoro.NewBar(tmpl, wTime)
+		bar := widget.NewBar(tmpl, wTime)
 		p := pomodoro.NewPomodoroTimer(r)
 		p.Subscribe(bar)
 
