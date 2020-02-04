@@ -21,7 +21,6 @@ import (
 
 	"github.com/icecream78/gomodoro/pomodoro"
 
-	"github.com/cheggaaa/pb/v3"
 	"github.com/spf13/cobra"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -43,24 +42,21 @@ var rootCmd = &cobra.Command{
 	Short: "CLI app for increasing your productivity with Pomodoro method",
 	Long:  ``,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		r, err := cmd.Flags().GetInt("count")
-		if err != nil {
-			fmt.Println("Error occuer")
-			return err
-		}
-		sCounter = pomodoro.NewStepsCounter(r)
-		workTimer = pomodoro.NewTimer(wTime, borderTime)
-		rTimer = pomodoro.NewTimer(rTime, borderTime)
-
-		pb.RegisterElement("wtimer", workTimer, true)
-		pb.RegisterElement("rtimer", rTimer, true)
-		pb.RegisterElement("steps", sCounter, true)
-
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		widget := pomodoro.NewWidget(wTime, workTimer, sCounter)
-		widget.Run()
+		r, err := cmd.Flags().GetInt("count")
+		if err != nil {
+			fmt.Println("Error occuer")
+			return
+		}
+		tmpl := `{{ red "Work time:" }} {{bar . "[" "=" "=>" "_" "]"}} {{ string . "timer" }} {{ string . "steps" }}`
+		bar := pomodoro.NewBar(tmpl, wTime)
+		p := pomodoro.NewPomodoroTimer(r)
+		p.Subscribe(bar)
+
+		// run app
+		p.Run()
 	},
 }
 
