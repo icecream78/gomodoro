@@ -14,6 +14,7 @@ type Ticker interface {
 	Tick()
 	Refresh()
 	Finished() bool
+	NeedNotify() bool
 	State() int
 }
 

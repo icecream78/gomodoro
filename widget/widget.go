@@ -54,11 +54,21 @@ func (b *Widget) Tick() {
 
 // TODO: write proper logic
 func (b *Widget) Refresh() {
+	bar := pb.ProgressBarTemplate(b.template).Start(b.showTime)
+	bar.Set("timer", "00:00")
+	bar.Set("steps", "")
+	b.bar = bar
 	return
 }
 
 func (b *Widget) Update(state *pomodoro.State) {
 	b.bar.Increment()
+	if state.Reset {
+		b.bar.Finish()
+		b.Refresh()
+		return
+	}
+
 	ts := b.RenderTimer(state.Progress)
 	ss := b.RenderSteps(state.Step, state.TotalStep)
 
@@ -89,9 +99,9 @@ func (t *Widget) getColorFunc(now int) colorFunc {
 func (t *Widget) RenderTimer(now int) string {
 	min, sec := t.getMinutesSeconds(now)
 	cf := t.getColorFunc(now)
-	// if finished {
-	// 	return cf("Finished!")
-	// }
+	if min == 0 && sec == 0 {
+		return cf("Finished!")
+	}
 	res := cf(
 		fmt.Sprintf(
 			"%s:%s",

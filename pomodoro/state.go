@@ -1,6 +1,8 @@
 package pomodoro
 
 type State struct {
+	Reset bool
+
 	Step      int
 	TotalStep int
 

@@ -35,6 +35,7 @@ func (p *Pomodoro) Notify(state *State) {
 }
 
 func (p *Pomodoro) getStepTime(currentStep int) int {
+	return 10
 	if currentStep%5 == 0 {
 		return 20 * 60
 	} else if currentStep%2 == 0 {
@@ -48,12 +49,11 @@ func (p *Pomodoro) Run() {
 	var timer Ticker
 	stepper := NewStepsCounter(p.stepsCount)
 	var stepTime int
+	var state *State
 
 	for !stepper.Finished() {
 		stepTime = p.getStepTime(stepper.CurrentStep())
-		timer = NewTimer(stepTime)
-
-		var state *State
+		timer = NewTimer(stepTime, 5)
 
 		for !timer.Finished() {
 			timer.Tick()
@@ -61,12 +61,15 @@ func (p *Pomodoro) Run() {
 				Step:             stepper.CurrentStep(),
 				Progress:         timer.State(),
 				TotalStep:        p.stepsCount,
-				Finished:         timer.Finished(),
-				MakeNotification: false,
+				MakeNotification: timer.NeedNotify(),
 			}
 			go p.Notify(state)
 			time.Sleep(1 * time.Second)
 		}
+		p.Notify(&State{
+			Reset: true,
+		})
 		stepper.NextStep()
+		timer.Refresh()
 	}
 }

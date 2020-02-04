@@ -7,13 +7,15 @@ import (
 type Timer struct {
 	seconds int
 	current int
+	border  int
 	mx      sync.Mutex
 }
 
-func NewTimer(t int) *Timer {
+func NewTimer(t int, border int) *Timer {
 	return &Timer{
 		seconds: t,
 		current: t,
+		border:  border,
 	}
 }
 
@@ -56,4 +58,11 @@ func (t *Timer) Reset() *Timer {
 	t.current = t.seconds
 	t.mx.Unlock()
 	return t
+}
+
+func (t *Timer) NeedNotify() bool {
+	t.mx.Lock()
+	now := t.current
+	t.mx.Unlock()
+	return now == t.border
 }
