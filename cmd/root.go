@@ -17,8 +17,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/icecream78/gomidoro/pomodoro"
 	"os"
+
+	"github.com/icecream78/gomodoro/pomodoro"
 
 	"github.com/cheggaaa/pb/v3"
 	"github.com/spf13/cobra"
@@ -38,7 +39,7 @@ var (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "gomidoro",
+	Use:   "gomodoro",
 	Short: "CLI app for increasing your productivity with Pomodoro method",
 	Long:  ``,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
@@ -89,7 +90,7 @@ func initConfig() {
 		}
 
 		viper.AddConfigPath(home)
-		viper.SetConfigName(".gomidoro")
+		viper.SetConfigName(".gomodoro")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
