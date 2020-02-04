@@ -16,7 +16,7 @@ limitations under the License.
 package main
 
 import (
-	"github.com/icecream78/gomidoro/cmd"
+	"github.com/icecream78/gomodoro/cmd"
 )
 
 func main() {

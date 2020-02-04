@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/icecream78/gomidoro/pomodoro"
+	"github.com/icecream78/gomodoro/pomodoro"
 
 	"github.com/cheggaaa/pb/v3"
 	"github.com/fatih/color"
