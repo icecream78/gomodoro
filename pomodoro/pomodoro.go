@@ -4,6 +4,8 @@ import (
 	"time"
 )
 
+var notifyTimeBorder int = 5
+
 type Pomodoro struct {
 	stepsCount int
 	wTime      int
@@ -35,7 +37,6 @@ func (p *Pomodoro) Notify(state *State) {
 }
 
 func (p *Pomodoro) getStepTime(currentStep int) int {
-	return 10
 	if currentStep%5 == 0 {
 		return 20 * 60
 	} else if currentStep%2 == 0 {
@@ -47,21 +48,21 @@ func (p *Pomodoro) getStepTime(currentStep int) int {
 
 func (p *Pomodoro) Run() {
 	var timer Ticker
-	stepper := NewStepsCounter(p.stepsCount)
 	var stepTime int
 	var state *State
+	stepper := NewStepsCounter(p.stepsCount)
 
 	for !stepper.Finished() {
 		stepTime = p.getStepTime(stepper.CurrentStep())
-		timer = NewTimer(stepTime, 5)
+		timer = NewTimer(stepTime, notifyTimeBorder)
 
 		for !timer.Finished() {
 			timer.Tick()
 			state = &State{
-				Step:             stepper.CurrentStep(),
-				Progress:         timer.State(),
-				TotalStep:        p.stepsCount,
-				MakeNotification: timer.NeedNotify(),
+				Step:      stepper.CurrentStep(),
+				Progress:  timer.State(),
+				TotalStep: p.stepsCount,
+				IsEnding:  timer.NeedNotify(),
 			}
 			go p.Notify(state)
 			time.Sleep(1 * time.Second)

@@ -7,112 +7,87 @@ import (
 	"github.com/icecream78/gomodoro/pomodoro"
 
 	"github.com/cheggaaa/pb/v3"
-	"github.com/fatih/color"
+)
+
+const (
+	ZeroedTime    int = 0
+	ZeroedStepper int = 1
 )
 
 type colorFunc func(a ...interface{}) string
 
-var (
-	progressColor  = color.New(color.FgRed, color.Bold).SprintFunc()
-	finishingColor = color.New(color.FgHiCyan, color.Bold).SprintFunc()
-	finishedColor  = color.New(color.FgGreen, color.Bold).SprintFunc()
-)
-
-func PadLeft(original string, padSymb string, length int) string {
-	if length <= 0 || len(original) >= length {
-		return original
-	}
-	s := original
-	for i := 0; i < length-len(original); i++ {
-		s = padSymb + s
-	}
-	return s
-}
-
+// NewBar returns new copy of widget that is shown in terminal
 func NewBar(template string, showTime int) *Widget {
-	bar := pb.ProgressBarTemplate(template).Start(showTime)
-	bar.Set("timer", "00:00")
-	bar.Set("steps", "")
-	return &Widget{
-		template:     template,
-		showTime:     showTime,
-		bar:          bar,
-		notifyBorder: 5, // TODO: remove hardcode
+	w := Widget{
+		template: template,
+		showTime: showTime,
 	}
+	w.initBar()
+	return &w
 }
 
 type Widget struct {
-	template     string
-	showTime     int
-	bar          *pb.ProgressBar
-	notifyBorder int
+	template string
+	showTime int
+	bar      *pb.ProgressBar
 }
 
-func (b *Widget) Tick() {
-	b.bar.Increment()
+func (w *Widget) Tick() {
+	w.bar.Increment()
 }
 
-// TODO: write proper logic
-func (b *Widget) Refresh() {
-	bar := pb.ProgressBarTemplate(b.template).Start(b.showTime)
-	bar.Set("timer", "00:00")
-	bar.Set("steps", "")
-	b.bar = bar
+func (w *Widget) initBar() {
+	bar := pb.ProgressBarTemplate(w.template).Start(w.showTime)
+	bar.Set("timer", w.formatTime(ZeroedTime))
+	bar.Set("steps", w.formatSteps(ZeroedStepper, ZeroedStepper))
+	w.bar = bar
 	return
 }
 
-func (b *Widget) Update(state *pomodoro.State) {
-	b.bar.Increment()
+func (w *Widget) Update(state *pomodoro.State) {
+	w.bar.Increment()
 	if state.Reset {
-		b.bar.Finish()
-		b.Refresh()
+		w.bar.Finish()
+		w.initBar()
 		return
 	}
 
-	ts := b.RenderTimer(state.Progress)
-	ss := b.RenderSteps(state.Step, state.TotalStep)
+	ts := w.renderTimer(state.Progress, state.IsEnding)
+	ss := w.formatSteps(state.Step, state.TotalStep)
 
-	b.bar.Set("timer", ts)
-	b.bar.Set("steps", ss)
+	w.bar.Set("timer", ts)
+	w.bar.Set("steps", ss)
 }
 
-func (t *Widget) getMinutesSeconds(now int) (min int, sec int) {
-	if now > 0 {
-		sec = now % 60
-		min = (now - sec) / 60
-	}
-	return
-}
-
-func (t *Widget) isEnding(now int) bool {
-	return now <= t.notifyBorder
-}
-
-func (t *Widget) getColorFunc(now int) colorFunc {
-	if t.isEnding(now) {
+func (w *Widget) getTimerColorFunc(now int, isEnding bool) colorFunc {
+	if now == 0 {
+		return doneColor
+	} else if isEnding {
 		return finishingColor
 	} else {
 		return progressColor
 	}
 }
 
-func (t *Widget) RenderTimer(now int) string {
-	min, sec := t.getMinutesSeconds(now)
-	cf := t.getColorFunc(now)
-	if min == 0 && sec == 0 {
-		return cf("Finished!")
-	}
-	res := cf(
-		fmt.Sprintf(
-			"%s:%s",
-			PadLeft(strconv.Itoa(min), "0", 2),
-			PadLeft(strconv.Itoa(sec), "0", 2),
-		),
-	)
+func (w *Widget) renderTimer(time int, isEnding bool) string {
+	cf := w.getTimerColorFunc(time, isEnding)
+	res := cf(w.formatTime(time))
 	return res
 }
 
-func (s *Widget) RenderSteps(current int, total int) string {
+func (w *Widget) formatTime(time int) string {
+	min, sec := getMinutesSeconds(time)
+	if min == 0 && sec == 0 {
+		return "Finished"
+	}
+	return fmt.Sprintf(
+		"%s:%s",
+		padLeft(strconv.Itoa(min), "0", 2),
+		padLeft(strconv.Itoa(sec), "0", 2),
+	)
+}
+
+func (w *Widget) formatSteps(current int, total int) string {
 	if total == 1 {
 		return ""
 	}

@@ -64,5 +64,5 @@ func (t *Timer) NeedNotify() bool {
 	t.mx.Lock()
 	now := t.current
 	t.mx.Unlock()
-	return now == t.border
+	return now <= t.border
 }
