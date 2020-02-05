@@ -30,11 +30,11 @@ import (
 
 var (
 	cfgFile string
-	// wTime, rTime, borderTime int = 25 * 60, 5 * 60, 1 * 60
-	wTime, rTime, borderTime int = 10, 5 * 60, 5
-	sCounter                 *pomodoro.StepsCounter
-	workTimer                *pomodoro.Timer
-	rTimer                   *pomodoro.Timer
+	// wTime, rTime, borderTime int = 25 * 60, 20 * 60, 5 * 60, 1 * 60
+	wTime, rTime, lrTime, borderTime int = 10, 20, 60, 5
+	sCounter                         *pomodoro.StepsCounter
+	workTimer                        *pomodoro.Timer
+	rTimer                           *pomodoro.Timer
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -52,8 +52,15 @@ var rootCmd = &cobra.Command{
 			return
 		}
 		tmpl := `{{ red "Work time:" }} {{bar . "[" "=" "=>" "_" "]"}} {{ string . "timer" }} {{ string . "steps" }}`
-		bar := widget.NewBar(tmpl, wTime)
-		p := pomodoro.NewPomodoroTimer(r)
+		bar := widget.NewBar(tmpl)
+		c := pomodoro.Config{
+			WorkTime:     wTime,
+			RestTime:     rTime,
+			NotifyTime:   borderTime,
+			Steps:        r,
+			LongRestTime: lrTime,
+		}
+		p := pomodoro.NewPomodoroTimer(&c)
 		p.Subscribe(bar)
 
 		// run app
