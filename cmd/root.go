@@ -18,6 +18,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path"
 
 	"github.com/icecream78/gomodoro/pomodoro"
 	"github.com/icecream78/gomodoro/widget"
@@ -84,18 +85,16 @@ func init() {
 }
 
 func initConfig() {
-	if cfgFile != "" {
-		viper.SetConfigFile(cfgFile)
-	} else {
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".gomodoro")
+	home, err := homedir.Dir()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
+
+	// TODO: generate base config on command enter
+	viper.AddConfigPath(path.Join(home, ".config", "gomodoro"))
+	viper.SetConfigName("config")
+	viper.SetConfigType("json")
 
 	viper.AutomaticEnv() // read in environment variables that match
 
