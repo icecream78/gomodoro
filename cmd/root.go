@@ -30,12 +30,8 @@ import (
 )
 
 var (
-	cfgFile string
-	// wTime, rTime, borderTime int = 25 * 60, 20 * 60, 5 * 60, 1 * 60
-	wTime, rTime, lrTime, borderTime int = 10, 20, 60, 5
-	sCounter                         *pomodoro.StepsCounter
-	workTimer                        *pomodoro.Timer
-	rTimer                           *pomodoro.Timer
+	template                            string = `{{ red "Work time:" }} {{bar . "[" "=" "=>" "_" "]"}} {{ string . "timer" }} {{ string . "steps" }}`
+	wTime, rTime, lrTime, notify, steps int
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -43,22 +39,13 @@ var rootCmd = &cobra.Command{
 	Use:   "gomodoro",
 	Short: "CLI app for increasing your productivity with Pomodoro method",
 	Long:  ``,
-	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		return nil
-	},
 	Run: func(cmd *cobra.Command, args []string) {
-		r, err := cmd.Flags().GetInt("count")
-		if err != nil {
-			fmt.Println("Error occuer")
-			return
-		}
-		tmpl := `{{ red "Work time:" }} {{bar . "[" "=" "=>" "_" "]"}} {{ string . "timer" }} {{ string . "steps" }}`
-		bar := widget.NewBar(tmpl)
+		bar := widget.NewBar(template)
 		c := pomodoro.Config{
 			WorkTime:     wTime,
 			RestTime:     rTime,
-			NotifyTime:   borderTime,
-			Steps:        r,
+			Notify:       notify,
+			Steps:        steps,
 			LongRestTime: lrTime,
 		}
 		p := pomodoro.NewPomodoroTimer(&c)
@@ -80,8 +67,13 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.Flags().BoolP("daemon", "d", false, "Run timer in background as daemon")
-	rootCmd.Flags().BoolP("break", "b", false, "Run break timer")
-	rootCmd.Flags().IntP("count", "c", 1, "Repeat timer [COUNT] times")
+
+	// TODO: write custom unmarshaller for values with support m,s shorthands
+	rootCmd.Flags().IntVarP(&steps, "count", "c", 1, "Repeat timer [COUNT] times")
+	rootCmd.Flags().IntVarP(&wTime, "step", "w", 25, "Time duration for work step in minutes")
+	rootCmd.Flags().IntVarP(&rTime, "break", "b", 5, "Time duration for break step in minutes")
+	rootCmd.Flags().IntVarP(&lrTime, "rest", "r", 20, "Time duration for rest step in minutes")
+	rootCmd.Flags().IntVarP(&notify, "notify", "n", 20, "Remaining time in percent when need make notification")
 }
 
 func initConfig() {
@@ -95,8 +87,6 @@ func initConfig() {
 	viper.AddConfigPath(path.Join(home, ".config", "gomodoro"))
 	viper.SetConfigName("config")
 	viper.SetConfigType("json")
-
-	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {

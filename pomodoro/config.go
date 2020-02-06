@@ -1,16 +1,18 @@
 package pomodoro
 
 const (
-	stepsCountDefault int = 1
-	notifyTimeDefault int = 5 * 60
-	workTimeDefault int = 25 * 60
-	restTimeDefault int = 5 * 60
-	longRestTimeDefault int = 20 * 60
+	minutesInSeconds        = 60
+	workTimeDefault     int = 25 * minutesInSeconds
+	restTimeDefault     int = 5 * minutesInSeconds
+	longRestTimeDefault int = 20 * minutesInSeconds
+
+	stepsCountDefault    int = 1
+	notifyPercentDefault int = 25
 )
 
 type Config struct {
-	Steps int
-	NotifyTime   int
+	Steps        int
+	Notify       int
 	WorkTime     int
 	RestTime     int
 	LongRestTime int
@@ -24,13 +26,13 @@ func (c *Config) GetStepsCount() int {
 	}
 }
 
-func (c *Config) GetNotifyTime() int {
-	if c.NotifyTime == -1 {
+func (c *Config) GetNotifyPercent() int {
+	if c.Notify == -1 {
 		return 0
-	} else if c.NotifyTime == 0 {
-		return notifyTimeDefault
+	} else if c.Notify == 0 {
+		return notifyPercentDefault
 	} else {
-		return c.NotifyTime
+		return c.Notify
 	}
 }
 
@@ -38,7 +40,7 @@ func (c *Config) GetWorkTime() int {
 	if c.WorkTime == 0 {
 		return workTimeDefault
 	} else {
-		return c.WorkTime
+		return c.WorkTime * minutesInSeconds
 	}
 }
 
@@ -46,7 +48,7 @@ func (c *Config) GetRestTime() int {
 	if c.RestTime == 0 {
 		return restTimeDefault
 	} else {
-		return c.RestTime
+		return c.RestTime * minutesInSeconds
 	}
 }
 
@@ -54,6 +56,6 @@ func (c *Config) GetLongRestTime() int {
 	if c.LongRestTime == 0 {
 		return longRestTimeDefault
 	} else {
-		return c.LongRestTime
+		return c.LongRestTime * minutesInSeconds
 	}
 }

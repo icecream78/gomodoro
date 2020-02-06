@@ -51,7 +51,7 @@ func (p *Pomodoro) Run() {
 
 	for !stepper.Finished() {
 		stepTime = p.getStepTime(stepper.CurrentStep())
-		timer = NewTimer(stepTime, p.GetNotifyTime())
+		timer = NewTimer(stepTime, p.GetNotifyPercent())
 		p.Notify(&State{
 			Reset:     true,
 			TotalTime: stepTime,
