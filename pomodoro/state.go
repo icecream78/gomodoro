@@ -6,7 +6,8 @@ type State struct {
 	Step      int
 	TotalStep int
 
-	Progress int
-	Finished bool
-	IsEnding bool
+	Progress  int
+	TotalTime int
+	Finished  bool
+	IsEnding  bool
 }

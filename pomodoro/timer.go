@@ -11,11 +11,16 @@ type Timer struct {
 	mx      sync.Mutex
 }
 
+func calculateNotifyTime(stageTime int, percent int) int {
+	perc := (float32(percent) / 100)
+	return int(float32(stageTime) * perc)
+}
+
 func NewTimer(t int, border int) *Timer {
 	return &Timer{
 		seconds: t,
 		current: t,
-		border:  border,
+		border:  calculateNotifyTime(t, border),
 	}
 }
 

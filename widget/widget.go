@@ -10,19 +10,19 @@ import (
 )
 
 const (
-	ZeroedTime    int = 0
-	ZeroedStepper int = 1
+	ZeroedTime      int = 0
+	ZeroedStepper   int = 1
+	DefaultShowTime int = 100
 )
 
 type colorFunc func(a ...interface{}) string
 
 // NewBar returns new copy of widget that is shown in terminal
-func NewBar(template string, showTime int) *Widget {
+func NewBar(template string) *Widget {
 	w := Widget{
 		template: template,
-		showTime: showTime,
+		showTime: DefaultShowTime,
 	}
-	w.initBar()
 	return &w
 }
 
@@ -36,21 +36,20 @@ func (w *Widget) Tick() {
 	w.bar.Increment()
 }
 
-func (w *Widget) initBar() {
-	bar := pb.ProgressBarTemplate(w.template).Start(w.showTime)
-	bar.Set("timer", w.formatTime(ZeroedTime))
-	bar.Set("steps", w.formatSteps(ZeroedStepper, ZeroedStepper))
-	w.bar = bar
+func (w *Widget) InitBar(barTime int) {
+	w.bar = pb.ProgressBarTemplate(w.template).Start(barTime)
 	return
 }
 
 func (w *Widget) Update(state *pomodoro.State) {
-	w.bar.Increment()
 	if state.Reset {
-		w.bar.Finish()
-		w.initBar()
+		if w.bar != nil {
+			w.bar.Finish()
+		}
+		w.InitBar(state.TotalTime)
 		return
 	}
+	w.bar.Increment()
 
 	ts := w.renderTimer(state.Progress, state.IsEnding)
 	ss := w.formatSteps(state.Step, state.TotalStep)
@@ -78,7 +77,7 @@ func (w *Widget) renderTimer(time int, isEnding bool) string {
 func (w *Widget) formatTime(time int) string {
 	min, sec := getMinutesSeconds(time)
 	if min == 0 && sec == 0 {
-		return "Finished"
+		return "Finished!"
 	}
 	return fmt.Sprintf(
 		"%s:%s",
