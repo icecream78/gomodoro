@@ -42,7 +42,7 @@ func (w *Widget) InitBar(barTime int) {
 }
 
 func (w *Widget) Update(state *pomodoro.State) {
-	if state.Reset {
+	if state.Event == pomodoro.PreStepHook {
 		if w.bar != nil {
 			w.bar.Finish()
 		}
@@ -56,6 +56,12 @@ func (w *Widget) Update(state *pomodoro.State) {
 
 	w.bar.Set("timer", ts)
 	w.bar.Set("steps", ss)
+	w.bar.Set("newline", "1")
+
+	// TODO: solve trouble with non printing char in template
+	if state.Event == pomodoro.PostStepHook {
+		w.bar.Set("newline", "\n")
+	}
 }
 
 func (w *Widget) getTimerColorFunc(now int, isEnding bool) colorFunc {
