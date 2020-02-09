@@ -49,18 +49,20 @@ func (w *Widget) Update(state *pomodoro.State) {
 		w.InitBar(state.TotalTime)
 		return
 	}
-	w.bar.Increment()
+	if state.Event == pomodoro.Progress {
+		w.bar.Increment()
 
-	ts := w.renderTimer(state.Progress, state.IsEnding)
-	ss := w.formatSteps(state.Step, state.TotalStep)
+		ts := w.renderTimer(state.Progress, state.IsEnding)
+		ss := w.formatSteps(state.Step, state.TotalStep)
 
-	w.bar.Set("timer", ts)
-	w.bar.Set("steps", ss)
-	w.bar.Set("newline", "1")
+		w.bar.Set("timer", ts)
+		w.bar.Set("steps", ss)
+	}
 
-	// TODO: solve trouble with non printing char in template
+	// manual calling write method for bar rerender
 	if state.Event == pomodoro.PostStepHook {
 		w.bar.Set("newline", "\n")
+		w.bar.Write()
 	}
 }
 
