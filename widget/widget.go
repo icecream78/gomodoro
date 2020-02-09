@@ -42,20 +42,28 @@ func (w *Widget) InitBar(barTime int) {
 }
 
 func (w *Widget) Update(state *pomodoro.State) {
-	if state.Reset {
+	if state.Event == pomodoro.PreStepHook {
 		if w.bar != nil {
 			w.bar.Finish()
 		}
 		w.InitBar(state.TotalTime)
 		return
 	}
-	w.bar.Increment()
+	if state.Event == pomodoro.Progress {
+		w.bar.Increment()
 
-	ts := w.renderTimer(state.Progress, state.IsEnding)
-	ss := w.formatSteps(state.Step, state.TotalStep)
+		ts := w.renderTimer(state.Progress, state.IsEnding)
+		ss := w.formatSteps(state.Step, state.TotalStep)
 
-	w.bar.Set("timer", ts)
-	w.bar.Set("steps", ss)
+		w.bar.Set("timer", ts)
+		w.bar.Set("steps", ss)
+	}
+
+	// manual calling write method for bar rerender
+	if state.Event == pomodoro.PostStepHook {
+		w.bar.Set("newline", "\n")
+		w.bar.Write()
+	}
 }
 
 func (w *Widget) getTimerColorFunc(now int, isEnding bool) colorFunc {

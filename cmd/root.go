@@ -20,6 +20,8 @@ import (
 	"os"
 	"path"
 
+	"github.com/icecream78/gomodoro/plugins"
+
 	"github.com/icecream78/gomodoro/pomodoro"
 	"github.com/icecream78/gomodoro/widget"
 
@@ -30,7 +32,7 @@ import (
 )
 
 var (
-	template                            string = `{{ red "Work time:" }} {{bar . "[" "=" "=>" "_" "]"}} {{ string . "timer" }} {{ string . "steps" }}`
+	template                            string = `{{ red "Work time:" }} {{bar . "[" "=" "=>" "_" "]"}} {{ string . "timer" }} {{ string . "steps" }} {{ string . "newline" }}`
 	wTime, rTime, lrTime, notify, steps int
 )
 
@@ -50,6 +52,7 @@ var rootCmd = &cobra.Command{
 		}
 		p := pomodoro.NewPomodoroTimer(&c)
 		p.Subscribe(bar)
+		p.SubscribeEvent(plugins.NewPrinter("post hook for faker"), pomodoro.PostHook)
 
 		// run app
 		p.Run()

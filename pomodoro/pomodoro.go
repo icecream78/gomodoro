@@ -8,27 +8,43 @@ type Pomodoro struct {
 	*Config
 	timer      Ticker
 	stepper    Stepper
-	subscribes []Oberver
+	subscribes map[Event][]Oberver
 }
 
 func NewPomodoroTimer(c *Config) *Pomodoro {
 	return &Pomodoro{
-		Config: c,
+		Config:     c,
+		subscribes: make(map[Event][]Oberver),
 	}
 }
 
 func (p *Pomodoro) Subscribe(sub Oberver) {
-	p.subscribes = append(p.subscribes, sub)
+	p.SubscribeEvent(sub, AllEvents...)
+}
+
+func (p *Pomodoro) SubscribeEvent(sub Oberver, events ...Event) {
+	for _, event := range events {
+		p.subscribes[event] = append(p.subscribes[event], sub)
+	}
+}
+
+func (p *Pomodoro) Unsubscribe(sub Oberver) {
+	p.UnsubscribeEvent(sub, Progress)
 }
 
 // TODO: add method for removing subscriber from list
-func (p *Pomodoro) Unsubscribe(sub Oberver) {
+func (p *Pomodoro) UnsubscribeEvent(sub Oberver, event Event) {
 }
 
 func (p *Pomodoro) Notify(state *State) {
+	p.notifyEvent(state.Event, state)
+}
+
+func (p *Pomodoro) notifyEvent(event Event, state *State) {
 	var fn Oberver
-	for i := 0; i < len(p.subscribes); i++ {
-		fn = p.subscribes[i]
+	coll := p.subscribes[event]
+	for i := 0; i < len(coll); i++ {
+		fn = coll[i]
 		fn.Update(state)
 	}
 }
@@ -53,13 +69,15 @@ func (p *Pomodoro) Run() {
 		stepTime = p.getStepTime(stepper.CurrentStep())
 		timer = NewTimer(stepTime, p.GetNotifyPercent())
 		p.Notify(&State{
-			Reset:     true,
+			Event:     PreStepHook,
 			TotalTime: stepTime,
 		})
 
 		for !timer.Finished() {
 			timer.Tick()
 			state = &State{
+				Event: Progress,
+
 				Step:      stepper.CurrentStep(),
 				TotalStep: p.GetStepsCount(),
 				Progress:  timer.State(),
@@ -68,7 +86,18 @@ func (p *Pomodoro) Run() {
 			go p.Notify(state)
 			time.Sleep(1 * time.Second)
 		}
+		p.Notify(&State{
+			Event:     PostStepHook,
+			IsEnding:  true,
+			Step:      stepper.CurrentStep(),
+			TotalStep: p.GetStepsCount(),
+			Progress:  timer.State(),
+		})
+
 		stepper.NextStep()
 		timer.Refresh()
 	}
+	p.Notify(&State{
+		Event: PostHook,
+	})
 }
