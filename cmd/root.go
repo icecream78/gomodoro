@@ -53,6 +53,10 @@ var rootCmd = &cobra.Command{
 		p := pomodoro.NewPomodoroTimer(&c)
 		p.Subscribe(bar)
 		p.SubscribeEvent(plugins.NewPrinter("post hook for faker"), pomodoro.PostHook)
+		p.SubscribeEvent(plugins.NewNotification("Main step", "Start work"), pomodoro.WorkStepStart)
+		p.SubscribeEvent(plugins.NewNotification("Main step", "Step finished"), pomodoro.PostStepHook)
+		p.SubscribeEvent(plugins.NewNotification("Finished", "Take a short break"), pomodoro.RestStepStart)
+		p.SubscribeEvent(plugins.NewNotification("Finished", "Take a rest after hard work"), pomodoro.LongRestStepStart)
 
 		// run app
 		p.Run()

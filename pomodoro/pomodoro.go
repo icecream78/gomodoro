@@ -49,12 +49,22 @@ func (p *Pomodoro) notifyEvent(event Event, state *State) {
 	}
 }
 
-func (p *Pomodoro) getStepTime(currentStep int) int {
+func (p *Pomodoro) getEventByStep(currentStep int) Event {
 	if currentStep%5 == 0 {
-		return p.GetLongRestTime()
+		return LongRestStepStart
 	} else if currentStep%2 == 0 {
+		return RestStepStart
+	}
+	return WorkStepStart
+}
+
+func (p *Pomodoro) getStepTime(event Event) int {
+	switch event {
+	case LongRestStepStart:
+		return p.GetLongRestTime()
+	case RestStepStart:
 		return p.GetRestTime()
-	} else {
+	default:
 		return p.GetWorkTime()
 	}
 }
@@ -66,11 +76,16 @@ func (p *Pomodoro) Run() {
 	stepper := NewStepsCounter(p.GetStepsCount())
 
 	for !stepper.Finished() {
-		stepTime = p.getStepTime(stepper.CurrentStep())
+		event := p.getEventByStep(stepper.CurrentStep())
+		stepTime = p.getStepTime(event)
+		stepTime = 3
 		timer = NewTimer(stepTime, p.GetNotifyPercent())
 		p.Notify(&State{
 			Event:     PreStepHook,
 			TotalTime: stepTime,
+		})
+		p.Notify(&State{
+			Event: event,
 		})
 
 		for !timer.Finished() {

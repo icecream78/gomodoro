@@ -8,6 +8,9 @@ const (
 	Progress
 	PostStepHook
 	PostHook
+	WorkStepStart
+	RestStepStart
+	LongRestStepStart
 )
 
 func (e Event) String() string {
@@ -22,6 +25,12 @@ func (e Event) String() string {
 		return "post hook"
 	case PostStepHook:
 		return "post step hook"
+	case WorkStepStart:
+		return "work step"
+	case RestStepStart:
+		return "rest step"
+	case LongRestStepStart:
+		return "long rest step"
 	}
 	return ""
 }
