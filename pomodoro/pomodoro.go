@@ -78,7 +78,6 @@ func (p *Pomodoro) Run() {
 	for !stepper.Finished() {
 		event := p.getEventByStep(stepper.CurrentStep())
 		stepTime = p.getStepTime(event)
-		stepTime = 3
 		timer = NewTimer(stepTime, p.GetNotifyPercent())
 		p.Notify(&State{
 			Event:     PreStepHook,
