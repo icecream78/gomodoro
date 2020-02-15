@@ -32,7 +32,7 @@ import (
 )
 
 var (
-	template                            string = `{{ red "Work time:" }} {{bar . "[" "=" "=>" "_" "]"}} {{ string . "timer" }} {{ string . "steps" }} {{ string . "newline" }}`
+	template                            string = `{{ red "Work time:" }} {{bar . "[" "=" "=>" "_" "]"}} {{ string . "timer" }} {{ string . "steps" }}`
 	wTime, rTime, lrTime, notify, steps int
 )
 
