@@ -15,8 +15,6 @@ const (
 	DefaultShowTime int = 100
 )
 
-type colorFunc func(a ...interface{}) string
-
 // NewBar returns new copy of widget that is shown in terminal
 func NewBar(template string) *Widget {
 	w := Widget{
@@ -43,12 +41,10 @@ func (w *Widget) InitBar(barTime int) {
 
 func (w *Widget) Update(state *pomodoro.State) {
 	if state.Event == pomodoro.PreStepHook {
-		if w.bar != nil {
-			w.bar.Finish()
-		}
 		w.InitBar(state.TotalTime)
 		return
 	}
+
 	if state.Event == pomodoro.Progress {
 		w.bar.Increment()
 
@@ -61,8 +57,7 @@ func (w *Widget) Update(state *pomodoro.State) {
 
 	// manual calling write method for bar rerender
 	if state.Event == pomodoro.PostStepHook {
-		w.bar.Set("newline", "\n")
-		w.bar.Write()
+		w.bar.Finish()
 	}
 }
 
