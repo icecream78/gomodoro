@@ -46,13 +46,15 @@ func (w *Widget) Update(state *pomodoro.State) {
 	}
 
 	if state.Event == pomodoro.Progress {
-		w.bar.Increment()
 
 		ts := w.renderTimer(state.Progress, state.IsEnding)
 		ss := w.formatSteps(state.Step, state.TotalStep)
 
+		fmt.Println(state.Progress)
+
 		w.bar.Set("timer", ts)
 		w.bar.Set("steps", ss)
+		w.bar.Increment()
 	}
 
 	// manual calling write method for bar rerender

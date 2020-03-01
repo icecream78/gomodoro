@@ -2,6 +2,7 @@ package pomodoro
 
 import (
 	"sync"
+	"time"
 )
 
 type Timer struct {
@@ -22,6 +23,40 @@ func NewTimer(t int, border int) *Timer {
 		current: t,
 		border:  calculateNotifyTime(t, border),
 	}
+}
+
+func (t *Timer) Run() chan int {
+	c := make(chan int)
+	go func() {
+		counter := t.seconds
+		// c <- counter
+
+		// finish := time.After(time.Duration(t.seconds) * time.Second)
+		// ticker := time.NewTicker(1 * time.Second)
+
+		// for {
+		// 	select {
+		// 	case <-finish:
+		// 		counter--
+		// 		c <- counter
+		// 		close(c)
+		// 		return
+		// 	case <-ticker.C:
+		// 		counter--
+		// 		c <- counter
+		// 	}
+		// }
+		for {
+			counter--
+			c <- counter
+			if counter == 0 {
+				close(c)
+				return
+			}
+			time.Sleep(1 * time.Second)
+		}
+	}()
+	return c
 }
 
 // Ticker implementation

@@ -1,9 +1,5 @@
 package pomodoro
 
-import (
-	"time"
-)
-
 type Pomodoro struct {
 	*Config
 	timer      Ticker
@@ -70,7 +66,6 @@ func (p *Pomodoro) getStepTime(event Event) int {
 }
 
 func (p *Pomodoro) Run() {
-	var timer Ticker
 	var stepTime int
 	var state *State
 	stepper := NewStepsCounter(p.GetStepsCount())
@@ -78,7 +73,6 @@ func (p *Pomodoro) Run() {
 	for !stepper.Finished() {
 		event := p.getEventByStep(stepper.CurrentStep())
 		stepTime = p.getStepTime(event)
-		timer = NewTimer(stepTime, p.GetNotifyPercent())
 		p.Notify(&State{
 			Event:     PreStepHook,
 			TotalTime: stepTime,
@@ -87,19 +81,19 @@ func (p *Pomodoro) Run() {
 			Event: event,
 		})
 
-		for !timer.Finished() {
-			timer.Tick()
+		timer := NewTimer(stepTime, p.GetNotifyPercent())
+
+		for remainSeconds := range timer.Run() {
 			state = &State{
 				Event: Progress,
 
 				Step:      stepper.CurrentStep(),
 				TotalStep: p.GetStepsCount(),
-				Progress:  timer.State(),
-				IsEnding:  timer.NeedNotify(),
+				Progress:  remainSeconds,
 			}
 			go p.Notify(state)
-			time.Sleep(1 * time.Second)
 		}
+
 		p.Notify(&State{
 			Event:     PostStepHook,
 			IsEnding:  true,
